@@ -1,35 +1,63 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+import FormSection from "./Components/FormSection";
+import Dashboard from "./Components/Dashboard";
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Heading,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+} from "@chakra-ui/react";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Card
+        align="center"
+        variant={"elevated"}
+        paddingLeft={"0px"}
+        paddingRight={"0px"}
+        minHeight={"100vh"}
+        backgroundColor={"darkgrey"}
+        overflow={"hidden"}
+      >
+        <CardHeader>
+          <Heading size="md">takeUforward</Heading>
+        </CardHeader>
+        <CardBody>
+          <Tabs
+            isFitted
+            variant="soft-rounded"
+            minWidth={{ base: "300px", sm: "500px", md: "700px" }}
+            colorScheme="green"
+            marginTop={3}
+            backgroundColor={"white"}
+            borderRadius={10}
+            padding={3}
+            overflow={"scroll"}
+          >
+            <TabList mb="1em">
+              <Tab>Form</Tab>
+              <Tab>Dashboard</Tab>
+            </TabList>
+            <TabPanels>
+              <TabPanel>
+                <FormSection />
+              </TabPanel>
+              <TabPanel>
+                <Dashboard />
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
+        </CardBody>
+      </Card>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
