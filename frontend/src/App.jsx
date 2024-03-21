@@ -1,4 +1,3 @@
-import { useState } from "react";
 import "./App.css";
 import FormSection from "./Components/FormSection";
 import Dashboard from "./Components/Dashboard";
@@ -13,8 +12,10 @@ import {
   TabPanels,
   Tabs,
 } from "@chakra-ui/react";
+import { useState } from "react";
 
 function App() {
+  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   return (
     <>
       <Card
@@ -35,7 +36,12 @@ function App() {
           <Tabs
             isFitted
             variant="soft-rounded"
-            minWidth={{ base: "300px", sm: "500px", md: "700px" }}
+            minWidth={
+              isDashboardOpen
+                ? window.innerWidth - 0.05 * window.innerWidth
+                : { base: "300px", sm: "500px", md: "700px" }
+            }
+            minHeight={"200px"}
             colorScheme="green"
             marginTop={3}
             backgroundColor={"white"}
@@ -44,15 +50,15 @@ function App() {
             overflow={"scroll"}
           >
             <TabList mb="1em">
-              <Tab>Form</Tab>
-              <Tab>Dashboard</Tab>
+              <Tab onClick={() => setIsDashboardOpen(false)}>Form</Tab>
+              <Tab onClick={() => setIsDashboardOpen(true)}>Dashboard</Tab>
             </TabList>
             <TabPanels>
               <TabPanel>
                 <FormSection />
               </TabPanel>
               <TabPanel>
-                <Dashboard />
+                <Dashboard isOpen={isDashboardOpen} />
               </TabPanel>
             </TabPanels>
           </Tabs>
