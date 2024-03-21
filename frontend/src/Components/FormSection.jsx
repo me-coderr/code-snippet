@@ -3,7 +3,6 @@ import {
   FormControl,
   FormLabel,
   FormErrorMessage,
-  FormHelperText,
   Input,
   HStack,
   RadioGroup,
@@ -12,6 +11,7 @@ import {
   Textarea,
   Button,
 } from "@chakra-ui/react";
+import axios, { Axios } from "axios";
 
 const FormSection = () => {
   const [username, setUsername] = useState("");
@@ -23,7 +23,9 @@ const FormSection = () => {
   const [isUnfilledCode, setIsUnfilledCode] = useState(false);
   const [isUnfilledLanguage, setIsUnfilledLanguage] = useState(false);
 
-  const handleSubmit = () => {
+  const SERVER_URL = "http://localhost:3100";
+
+  const handleSubmit = async () => {
     let unfilledUsername = false,
       unfilledLanguage = false,
       unfilledCode = false;
@@ -41,6 +43,44 @@ const FormSection = () => {
     setIsUnfilledLanguage(unfilledLanguage);
     if (unfilledCode || unfilledUsername || unfilledLanguage) {
       return;
+    }
+
+    setIsLoading(true);
+
+    const config = {
+      headers: {
+        "Content-type": "application/json",
+      },
+    };
+    try {
+      const { data } = await axios.post(
+        `${SERVER_URL}/api/snippets/add`,
+        {
+          username: username,
+          language: language,
+          inputs: inputs,
+          code: code,
+        },
+        config
+      );
+
+      console.log(
+        `\nLogging response from server after adding snippet at database : ${data}\n`
+      );
+
+      setIsLoading(false);
+      setInputs("");
+      setCode("");
+      setLanguage("");
+      setUsername("");
+    } catch (err) {
+      setIsLoading(false);
+      setInputs("");
+      setCode("");
+      setLanguage("");
+      setUsername("");
+      console.log(`\nError in axios post : ${err}\n`);
+      throw err;
     }
   };
 
@@ -80,6 +120,7 @@ const FormSection = () => {
               }
               setLanguage(e);
             }}
+            value={language}
           >
             <HStack spacing="30px">
               <Radio value="C++">C++</Radio>

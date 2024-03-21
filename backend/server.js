@@ -1,115 +1,67 @@
-// // Register module/require aliases
-// // require('module-alias/register');
-
-// // // Patches
-// // const {inject, errorHandler} = require('express-custom-error');
-// // inject(); // Patch express in order to use async / await syntax
-
-// // Require Dependencies
-
-// const express = require('express');
-// // const cookieParser = require('cookie-parser');
-// const cors = require('cors');
-// // const helmet = require('helmet');
-
-// // const logger = require('@util/logger');
-
-// // Load .env Enviroment Variables to process.env
-
-// require('mandatoryenv').load([
-//     'DB_HOST',
-//     'DB_DATABASE',
-//     'DB_USER',
-//     'DB_PASSWORD',
-//     'PORT',
-//     'SECRET'
-// ]);
-
-// const { PORT } = process.env;
-
-// // Instantiate an Express Application
-// const app = express();
-
-// // Configure Express App Instance
-// app.use(express.json( { limit: '50mb' } ));
-// app.use(express.urlencoded( { extended: true, limit: '10mb' } ));
-
-// // Configure custom logger middleware
-// app.use(logger.dev, logger.combined);
-
-// app.use(cookieParser());
-// app.use(cors());
-// app.use(helmet());
-
-// // This middleware adds the json header to every response
-// app.use('*', (req, res, next) => {
-//     res.setHeader('Content-Type', 'application/json');
-//     next();
-// })
-
-// // Assign Routes
-
-// app.use('/', require('@routes/router.js'));
-
-// // Handle errors
-// app.use(errorHandler());
-
-// // Handle not valid route
-// app.use('*', (req, res) => {
-//     res
-//     .status(404)
-//     .json( {status: false, message: 'Endpoint Not Found'} );
-// })
-
-// // Open Server on selected Port
-// app.listen(
-//     PORT,
-//     () => console.info('Server listening on port ', PORT)
-// );
-
 const express = require("express");
-const mysql = require("mysql2");
 require("dotenv").config();
+const { connectDB } = require("./config/db");
+const cors = require("cors");
 
 const PORT = process.env.PORT || 5000;
 
-console.log(
-  process.env.DB_HOST,
-  " ",
-  process.env.DB_USER,
-  " ",
-  process.env.DB_PASSWORD,
-  " ",
-  process.env.DB_DATABASE
-);
+const startServer = async () => {
+  const app = express();
+  const db = await connectDB();
+  const allowedOrigins = ["http://localhost:5173"];
+  const corsOptions = {
+    origin: function (origin, callback) {
+      if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+  };
 
-const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
-});
+  app.use(cors(corsOptions));
+  app.use(express.json());
 
-const app = express();
+  // add a new snippet
+  app.post("/api/snippets/add", async (req, res) => {
+    const { username, language, inputs, code } = req.body;
 
-app.post("/api/add", async (req, res) => {
-  const { username, language, input, code } = req.body;
-  const timestamp = new Date().toISOString();
-  const sqlQuer = `insert into ${process.env.DB_TABLE} values (${username}, ${language}, ${input}, ${code}, ${timestamp}, ${timestamp})`;
-  db.query(sqlQuery, (err, result) => {
+    if (!username || !language || !code) {
+      res.status(400).send({
+        error: "You must atleast add username, language, code in request body",
+      });
+    }
+
+    const sqlQuery = `INSERT INTO ${process.env.DB_TABLE} (username, code_language, stdin, source_code, updated_at) VALUES (?, ?, ?, ?, NOW())`;
+    db.query(sqlQuery, [username, language, inputs, code], (err, result) => {
+      if (err) {
+        console.log(err);
+        throw err;
+      }
+      console.log(result);
+      res.status(200).send({ message: "success" });
+    });
+  });
+
+  // fetch all uploaded snippets
+  app.get("/api/snippets/", async (req, res) => {
+    const sql = "SELECT * FROM code_snippets";
+    db.query(sql, (err, result) => {
+      if (err) {
+        console.log(`\nError in select query : ${err}\n`);
+        throw err;
+      }
+      res.json(result);
+    });
+  });
+
+  const server = app.listen(PORT, (err) => {
     if (err) {
-      console.log(err);
+      console.log(`\nError at app.listen : ${err}\n`);
       throw err;
     }
-    console.log(result);
-    res.sendStatus(200);
+    console.log(`\nServer running at Port: ${PORT}\n`);
   });
-});
+};
 
-app.listen(PORT, (err) => {
-  if (err) {
-    console.log("Error at app.listen : ", err);
-    throw err;
-  }
-  console.log(`Server running at Port: ${PORT}`);
-});
+startServer();
