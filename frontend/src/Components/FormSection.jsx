@@ -84,13 +84,6 @@ const FormSection = () => {
     }
   };
 
-  // useEffect(() => {
-  //   console.log(language);
-  // }, [language]);
-  // useEffect(() => {
-  //   console.log(username);
-  // }, [username]);
-
   return (
     <>
       <VStack spacing={10}>
