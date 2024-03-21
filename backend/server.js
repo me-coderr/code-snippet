@@ -8,7 +8,11 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   const app = express();
   const db = await connectDB();
-  const allowedOrigins = ["http://localhost:5173"];
+
+  const allowedOrigins = [
+    "http://localhost:5173",
+    "https://code-snippet-frontend-vmi7.onrender.com",
+  ];
   const corsOptions = {
     origin: function (origin, callback) {
       if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
