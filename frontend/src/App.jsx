@@ -27,7 +27,9 @@ function App() {
         overflow={"hidden"}
       >
         <CardHeader>
-          <Heading size="md">takeUforward</Heading>
+          <Heading size="xl" fontFamily={"sans-serif"}>
+            takeUforward
+          </Heading>
         </CardHeader>
         <CardBody>
           <Tabs
